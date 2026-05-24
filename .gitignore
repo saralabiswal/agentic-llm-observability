@@ -1,0 +1,37 @@
+# macOS
+.DS_Store
+
+# Local environment
+.env
+.venv/
+venv/
+.vscode/
+
+# Python caches and reports
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local runtime state
+*.db
+*.sqlite
+*.sqlite3
+observability.db
+
+# Node/Vite build artifacts
+node_modules/
+ui/node_modules/
+dist/
+ui/dist/
+*.tsbuildinfo
+
+# Playwright artifacts
+test-results/
+playwright-report/
+
+# Local planning notes
+docs/planning/

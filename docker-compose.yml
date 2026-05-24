@@ -1,0 +1,17 @@
+# Local container orchestration for the standalone observability stack.
+# Author: Sarala Biswal
+
+services:
+  api:
+    build: .
+    ports:
+      - "9100:9100"
+    env_file:
+      - .env.example
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///./data/observability.db
+    volumes:
+      - observability-data:/app/data
+
+volumes:
+  observability-data:
