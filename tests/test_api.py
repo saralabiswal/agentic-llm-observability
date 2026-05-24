@@ -60,13 +60,14 @@ async def test_api_endpoints_return_expected_shapes(client: AsyncClient) -> None
 @pytest.mark.asyncio
 async def test_ingest_and_prompt_compare_and_config(client: AsyncClient) -> None:
     call_id = f"api-test-call-{uuid4()}"
+    use_case = f"api_test_{uuid4().hex}"
     ingest_response = await client.post(
         "/ingest",
         json={
             "call_id": call_id,
             "model": "gpt-4o-mini",
             "provider": "openai",
-            "use_case": "api_test",
+            "use_case": use_case,
             "prompt_version": "v1.0",
             "input_tokens": 100,
             "output_tokens": 50,
@@ -79,10 +80,22 @@ async def test_ingest_and_prompt_compare_and_config(client: AsyncClient) -> None
     assert ingest_response.status_code == 200
     assert ingest_response.json()["status"] == "accepted"
 
+    baseline_response = await client.post(
+        "/prompts/versions",
+        json={
+            "use_case": use_case,
+            "version": "v1.0",
+            "prompt_text": "Baseline prompt",
+            "model": "gpt-4o-mini",
+            "status": "active",
+        },
+    )
+    assert baseline_response.status_code == 200
+
     create_response = await client.post(
         "/prompts/versions",
         json={
-            "use_case": "api_test",
+            "use_case": use_case,
             "version": "v9.0",
             "prompt_text": "Prompt",
             "model": "gpt-4o-mini",
@@ -91,7 +104,8 @@ async def test_ingest_and_prompt_compare_and_config(client: AsyncClient) -> None
     )
     assert create_response.status_code == 200
 
-    versions = (await client.get("/prompts/versions?use_case=banking_payment_risk")).json()
+    versions = (await client.get(f"/prompts/versions?use_case={use_case}")).json()
+    assert len(versions) == 2
     compare = await client.get(
         f"/prompts/compare?a={versions[0]['version_id']}&b={versions[1]['version_id']}"
     )
