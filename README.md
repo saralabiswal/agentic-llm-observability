@@ -9,13 +9,16 @@
 
 > Production observability for LLM-powered revenue workflows — token economics,
 > quality governance, latency SLOs, prompt versioning, and semantic drift detection,
-> tied to a live Quote-to-Cash agentic flow.
+> tied to a live Quote-to-Cash agentic flow. Runs locally on Ollama with real
+> cost modelling across AWS Bedrock, Azure OpenAI, OCI Generative AI, and Google Vertex AI.
 
 [![Python](https://img.shields.io/badge/Python-3.12-3b82f6?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-10b981?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react&logoColor=white)](https://react.dev)
+[![Ollama](https://img.shields.io/badge/Ollama-local--first-f59e0b?style=flat-square)](https://ollama.com)
+[![OCI](https://img.shields.io/badge/OCI-Generative%20AI-f87171?style=flat-square&logo=oracle&logoColor=white)](https://oracle.com/cloud)
 [![License](https://img.shields.io/badge/license-MIT-a855f7?style=flat-square)](LICENSE)
-[![CI](https://img.shields.io/badge/CI-pytest%20%2B%20Playwright-f59e0b?style=flat-square)](/.github/workflows/ci.yml)
+[![CI](https://img.shields.io/badge/CI-pytest%20%2B%20Playwright-64748b?style=flat-square)](/.github/workflows/ci.yml)
 
 ---
 
@@ -56,18 +59,18 @@ platform architecture running in production across 600+ enterprise clients at Or
 
 ## Application Modules
 
-| Module | What it shows |
-|---|---|
-| **About** | Business problem, solution architecture, operating model |
-| **Quote Agentic Flow** | Runs the 5-agent Quote-to-Cash chain, emits live telemetry |
-| **Cost Impact** | Token economics, provider rate-card comparison, optimizer recommendations |
-| **Quality Evidence** | Faithfulness, relevance, coherence scores, hallucination signals, quality gates |
-| **Latency SLOs** | p50/p95/p99 distribution, SLO compliance %, breach visibility |
-| **Prompt Governance** | Prompt version registry, A/B comparison, rollout status |
-| **Drift & Alerts** | Semantic drift scores, threshold alerts, operational posture |
-| **Developer Corner** | Actual prompts and policy documents used by each agent step |
-| **Architecture** | System diagram, runtime path, integration guide |
-| **Settings** | Local model selection, provider cost-lens configuration |
+| # | Module | What it shows |
+|---|---|---|
+| 00 | **About** | Business problem, solution architecture, operating model |
+| 01 | **Quote Agentic Flow** | Runs the 5-agent chain, emits live telemetry per step |
+| 02 | **Cost Impact** | Token economics, provider rate-card comparison, optimizer |
+| 03 | **Quality Evidence** | Faithfulness, relevance, coherence, hallucination signals, quality gates |
+| 04 | **Latency SLOs** | p50/p95/p99 distribution, SLO compliance %, breach visibility |
+| 05 | **Prompt Governance** | Prompt version registry, A/B comparison, rollout status |
+| 06 | **Drift & Alerts** | Semantic drift scores, threshold alerts, 84 alert types tracked |
+| 07 | **Architecture** | System diagram, runtime path, integration guide |
+| 08 | **Settings** | Provider cost-lens selector, local model configuration |
+| 09 | **Developer Corner** | Actual prompts and policy documents used by each agent step |
 
 ---
 
@@ -122,38 +125,64 @@ Opportunity selected
 
 ---
 
-## Runtime Strategy — Local-First
+## Runtime Strategy — Local-First, Multi-Cloud Cost Modelling
 
-The default runtime requires no cloud credentials and no API keys:
+**Execution is always local. Provider selection changes the cost model.**
 
-| Setting | Default | Alternatives |
+The platform runs entirely on a local Ollama instance — no API keys required,
+no cloud calls made. Selecting a cloud provider updates the Cost Impact dashboards
+with real rate-card pricing so engineers can model what production cloud costs
+would look like before committing to a provider.
+
+### Provider Cost Matrix
+
+| Provider | Model | Input | Output | Use Case |
+|---|---|---|---|---|
+| **Local LLM** | Ollama (blended) | $0.20 | $0.20 | Actual execution — standalone demo |
+| **AWS Bedrock** | Claude 3.5 Haiku | $0.80 | $4.00 | Production agent workloads |
+| **Azure OpenAI** | GPT-4o mini | $0.15 | $0.60 | Global deployment, low-cost reasoning |
+| **OCI Generative AI** | Cohere Command R | $0.15 | $0.60 | Enterprise RAG-style flows |
+| **Google Vertex AI** | Gemini 2.0 Flash | $0.15 | $0.60 | Fast agentic workflows |
+
+*Prices per 1M tokens. OCI Generative AI reflects Oracle Cloud Infrastructure pricing.*
+
+### Local Model Options
+
+| Model | Cost / 1M tokens | Profile |
 |---|---|---|
-| **Provider** | Local (Ollama) | AWS · Azure · OCI · GCP (rate-card planning) |
-| **Model** | `llama3.2` | `qwen2.5:7b` · `mistral` |
-| **Execution** | Always local | Cloud providers show cost impact without executing remotely |
+| **Llama 3.2** | $0.20 | Balanced default — Quote-to-Cash reasoning |
+| **Qwen 2.5** | $0.24 | Higher quality — complex multi-step reasoning |
+| **Mistral** | $0.18 | Lowest cost — high-volume quote drafting |
 
-Cloud provider selections update cost calculations using real rate cards while
-continuing to execute locally. This keeps the platform standalone while demonstrating
-realistic production cost modelling.
+Switch models in Settings to compare cost, quality, and latency
+behaviour across the same Quote-to-Cash workflow.
+
+### Live Telemetry (sidebar, updates per run)
+
+| Metric | What it tracks |
+|---|---|
+| **Calls** | Total LLM calls ingested this session |
+| **Spend** | Cumulative token cost at selected provider rate |
+| **Quality** | Rolling average composite quality score (0.0–1.0) |
+| **Alerts** | Active threshold breaches across cost, quality, and drift |
 
 ---
 
 ## Quick Start
 
-**Install dependencies and seed the database:**
+**Install and seed:**
 
 ```bash
 make install
-ollama pull llama3.2
 make seed
 ```
 
-**Pull all supported local models:**
+**Pull local models (Llama 3.2 is the default):**
 
 ```bash
-ollama pull llama3.2
-ollama pull qwen2.5:7b
-ollama pull mistral
+ollama pull llama3.2        # default — balanced quality/cost
+ollama pull qwen2.5:7b      # higher quality, higher cost
+ollama pull mistral         # lowest cost, high-volume drafting
 ```
 
 **Run the platform:**
@@ -168,9 +197,12 @@ make dev-ui
 
 | Service | URL |
 |---|---|
+| UI Dashboard | http://localhost:5173 |
 | API | http://localhost:9100 |
-| UI | http://localhost:5173 |
-| Metrics | http://localhost:9100/metrics |
+| Prometheus Metrics | http://localhost:9100/metrics |
+
+Open **Settings** (module 08) to switch local model or provider cost lens.
+Open **Quote Agentic Flow** (module 01) to run the agent chain and generate live telemetry.
 
 ---
 
@@ -242,12 +274,13 @@ async def generate_quote_guidance(context: dict) -> str:
 |---|---|
 | API | FastAPI · Pydantic v2 · SQLAlchemy async |
 | Persistence | SQLite (default) · PostgreSQL (production path) |
-| Local LLM | Ollama (Llama 3.2 · Qwen 2.5 · Mistral) |
-| Optional cloud LLM | LiteLLM / OpenAI-compatible |
-| Cost modelling | Provider rate cards + token-based calculators |
-| Quality scoring | Deterministic scoring + optional judge path |
+| Local LLM | Ollama — Llama 3.2 · Qwen 2.5 · Mistral |
+| Cloud providers (cost modelling) | AWS Bedrock · Azure OpenAI · OCI Generative AI · Google Vertex AI |
+| Multi-provider abstraction | LiteLLM |
+| Cost modelling | Per-provider token rate cards (5 providers) |
+| Quality scoring | Deterministic scoring + optional LLM judge |
 | Drift detection | Embedding similarity + threshold alerts |
-| Metrics | Prometheus-compatible `/metrics` endpoint |
+| Observability | Prometheus-compatible `/metrics` endpoint |
 | UI | React 18 · Vite · TypeScript · Recharts · Lucide |
 | Testing | pytest · pytest-asyncio · Playwright |
 
