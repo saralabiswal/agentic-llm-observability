@@ -5,6 +5,7 @@ Author: Sarala Biswal
 """
 
 from datetime import UTC, datetime, timedelta
+from importlib import import_module
 
 import numpy as np
 from sqlalchemy import select
@@ -44,9 +45,8 @@ class SemanticDriftDetector:
         if not current or not baseline:
             return 0.0
 
-        from sentence_transformers import SentenceTransformer
-
-        encoder = SentenceTransformer("all-MiniLM-L6-v2")
+        sentence_transformers = import_module("sentence_transformers")
+        encoder = sentence_transformers.SentenceTransformer("all-MiniLM-L6-v2")
         current_embeddings = encoder.encode(current)
         baseline_embeddings = encoder.encode(baseline)
         current_mean = np.mean(current_embeddings, axis=0)

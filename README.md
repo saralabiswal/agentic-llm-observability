@@ -204,6 +204,15 @@ make dev-ui
 Open **Settings** (module 08) to switch local model or provider cost lens.
 Open **Quote Agentic Flow** (module 01) to run the agent chain and generate live telemetry.
 
+**Optional real embedding drift scoring:**
+
+```bash
+uv sync --extra dev --extra ml
+```
+
+The default install keeps CI and local setup lightweight. The `ml` extra installs
+`sentence-transformers` for real embedding-based drift scoring outside demo mode.
+
 ---
 
 ## API Reference
